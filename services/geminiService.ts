@@ -1,2 +1,2 @@
-// This file is no longer required for the standalone LiftLog application.
+// File removed to maintain a pure, AI-free standalone application.
 export {};
