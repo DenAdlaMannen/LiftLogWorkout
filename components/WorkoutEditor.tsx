@@ -1,22 +1,18 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Workout, Exercise } from '../types';
-import { Plus, Trash2, Save, X, Sparkles, Loader2, GripVertical } from 'lucide-react';
-import { generateWorkout } from '../services/geminiService';
+import { Plus, Trash2, Save, X } from 'lucide-react';
 
 interface WorkoutEditorProps {
   workout: Workout | null;
   onSave: (workout: Workout) => void;
   onCancel: () => void;
-  enableAi: boolean;
 }
 
-const WorkoutEditor: React.FC<WorkoutEditorProps> = ({ workout, onSave, onCancel, enableAi }) => {
+const WorkoutEditor: React.FC<WorkoutEditorProps> = ({ workout, onSave, onCancel }) => {
   const [name, setName] = useState(workout?.name || '');
   const [description, setDescription] = useState(workout?.description || '');
   const [exercises, setExercises] = useState<Exercise[]>(workout?.exercises || []);
-  const [aiGoal, setAiGoal] = useState('');
-  const [isGenerating, setIsGenerating] = useState(false);
 
   const addExercise = () => {
     const newExercise: Exercise = {
@@ -37,27 +33,6 @@ const WorkoutEditor: React.FC<WorkoutEditorProps> = ({ workout, onSave, onCancel
     setExercises(exercises.map(e => e.id === id ? { ...e, ...updates } : e));
   };
 
-  const handleAiGenerate = async () => {
-    if (!aiGoal) return;
-    setIsGenerating(true);
-    try {
-      const generated = await generateWorkout(aiGoal);
-      if (generated.name) setName(generated.name);
-      if (generated.description) setDescription(generated.description);
-      if (generated.exercises) {
-        setExercises(generated.exercises.map(e => ({
-          ...e,
-          id: Math.random().toString(36).substr(2, 9)
-        })));
-      }
-      setAiGoal('');
-    } catch (e) {
-      alert("AI generation failed. Please check your API key or try again.");
-    } finally {
-      setIsGenerating(false);
-    }
-  };
-
   const handleSave = () => {
     if (!name.trim()) {
       alert("Workout name is required");
@@ -74,135 +49,86 @@ const WorkoutEditor: React.FC<WorkoutEditorProps> = ({ workout, onSave, onCancel
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="flex flex-col gap-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold">{workout ? 'Edit Workout' : 'New Routine'}</h2>
-          <button onClick={onCancel} className="text-slate-400 hover:text-white transition-colors">
-            <X className="w-6 h-6" />
-          </button>
+    <div className="space-y-8 pb-10">
+      <div className="flex items-center justify-between">
+        <h2 className="text-3xl font-black italic uppercase tracking-tighter">
+          {workout ? 'Edit' : 'New'} <span className="text-emerald-500">Routine</span>
+        </h2>
+        <button onClick={onCancel} className="p-2 bg-slate-900 rounded-full text-slate-400">
+          <X className="w-6 h-6" />
+        </button>
+      </div>
+
+      <div className="bg-slate-900 border border-slate-800 rounded-[2rem] p-6 space-y-6 shadow-xl">
+        <div>
+          <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Workout Name</label>
+          <input 
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="e.g., Push Day"
+            className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 focus:border-emerald-500 outline-none text-xl font-bold transition-colors"
+          />
         </div>
-
-        {/* AI Helper Card - Hidden behind feature flag */}
-        {enableAi && (
-          <div className="bg-emerald-950/20 border border-emerald-900/50 rounded-2xl p-4 sm:p-6 space-y-4">
-            <div className="flex items-center gap-2 text-emerald-400 font-semibold text-sm uppercase tracking-wider">
-              <Sparkles className="w-4 h-4" />
-              AI Workout Builder
-            </div>
-            <div className="flex flex-col sm:flex-row gap-2">
-              <input 
-                type="text"
-                placeholder="e.g., Build explosive power for soccer"
-                className="flex-1 bg-slate-900 border border-emerald-900/30 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
-                value={aiGoal}
-                onChange={(e) => setAiGoal(e.target.value)}
-                disabled={isGenerating}
-              />
-              <button 
-                onClick={handleAiGenerate}
-                disabled={isGenerating || !aiGoal}
-                className="bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all whitespace-nowrap"
-              >
-                {isGenerating ? <Loader2 className="w-5 h-5 animate-spin" /> : <Sparkles className="w-5 h-5" />}
-                Generate
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Basic Info */}
-        <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6 space-y-4">
-          <div>
-            <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Workout Name</label>
-            <input 
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="e.g., Push Day Intensity"
-              className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all text-lg font-semibold"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Description</label>
-            <textarea 
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Focus on mind-muscle connection..."
-              className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all min-h-[80px]"
-            />
-          </div>
+        <div>
+          <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Notes / Goals</label>
+          <textarea 
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Routine details..."
+            className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 focus:border-emerald-500 outline-none min-h-[100px] transition-colors"
+          />
         </div>
       </div>
 
-      {/* Exercises List */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-bold">Exercises</h3>
+      <div className="space-y-6">
+        <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+          <h3 className="text-sm font-black text-slate-500 uppercase tracking-widest">Exercises</h3>
           <button 
             onClick={addExercise}
-            className="text-emerald-400 hover:text-emerald-300 flex items-center gap-1 font-semibold transition-colors"
+            className="text-emerald-500 hover:text-emerald-400 font-black text-xs uppercase tracking-widest flex items-center gap-1"
           >
-            <Plus className="w-5 h-5" />
-            Add Exercise
+            <Plus className="w-4 h-4" /> Add
           </button>
         </div>
 
         {exercises.length === 0 && (
-          <div className="border-2 border-dashed border-slate-800 rounded-2xl p-12 text-center text-slate-500">
-            No exercises added yet. Click "Add Exercise" to start building your routine.
+          <div className="py-12 text-center text-slate-600 border border-dashed border-slate-800 rounded-[2rem]">
+            Tap "Add" to include exercises.
           </div>
         )}
 
-        <div className="space-y-3">
+        <div className="space-y-4">
           {exercises.map((ex, index) => (
-            <div key={ex.id} className="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 flex flex-col gap-4 group">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-xs font-black text-slate-500">
+            <div key={ex.id} className="bg-slate-900 border border-slate-800 rounded-[2rem] p-5 shadow-lg">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-8 h-8 rounded-full bg-emerald-600 flex items-center justify-center text-xs font-black text-white">
                   {index + 1}
                 </div>
                 <input 
                   type="text"
                   placeholder="Exercise Name"
-                  className="flex-1 bg-transparent border-b border-slate-700 py-1 focus:outline-none focus:border-emerald-500 transition-all font-bold text-lg"
+                  className="flex-1 bg-transparent border-b border-slate-800 py-1 focus:border-emerald-500 outline-none font-bold text-lg transition-colors"
                   value={ex.name}
                   onChange={(e) => updateExercise(ex.id, { name: e.target.value })}
                 />
-                <button 
-                  onClick={() => removeExercise(ex.id)}
-                  className="p-2 text-slate-600 hover:text-rose-500 transition-colors"
-                >
+                <button onClick={() => removeExercise(ex.id)} className="p-2 text-slate-600 hover:text-rose-500">
                   <Trash2 className="w-5 h-5" />
                 </button>
               </div>
 
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-1">
-                  <label className="text-[10px] font-black text-slate-500 uppercase">Sets</label>
-                  <input 
-                    type="number"
-                    className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-emerald-500 text-center font-bold"
-                    value={ex.sets}
-                    onChange={(e) => updateExercise(ex.id, { sets: parseInt(e.target.value) || 0 })}
-                  />
+                  <label className="text-[9px] font-black text-slate-500 uppercase">Sets</label>
+                  <input type="number" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-center font-bold" value={ex.sets} onChange={(e) => updateExercise(ex.id, { sets: parseInt(e.target.value) || 0 })} />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[10px] font-black text-slate-500 uppercase">Reps</label>
-                  <input 
-                    type="number"
-                    className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-emerald-500 text-center font-bold"
-                    value={ex.targetReps}
-                    onChange={(e) => updateExercise(ex.id, { targetReps: parseInt(e.target.value) || 0 })}
-                  />
+                  <label className="text-[9px] font-black text-slate-500 uppercase">Reps</label>
+                  <input type="number" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-center font-bold" value={ex.targetReps} onChange={(e) => updateExercise(ex.id, { targetReps: parseInt(e.target.value) || 0 })} />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[10px] font-black text-slate-500 uppercase">Weight (kg)</label>
-                  <input 
-                    type="number"
-                    className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-emerald-500 text-center font-bold"
-                    value={ex.targetWeight}
-                    onChange={(e) => updateExercise(ex.id, { targetWeight: parseInt(e.target.value) || 0 })}
-                  />
+                  <label className="text-[9px] font-black text-slate-500 uppercase">Weight</label>
+                  <input type="number" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-center font-bold" value={ex.targetWeight} onChange={(e) => updateExercise(ex.id, { targetWeight: parseInt(e.target.value) || 0 })} />
                 </div>
               </div>
             </div>
@@ -210,21 +136,9 @@ const WorkoutEditor: React.FC<WorkoutEditorProps> = ({ workout, onSave, onCancel
         </div>
       </div>
 
-      {/* Persistent Footer Actions */}
-      <div className="sticky bottom-4 left-0 right-0 py-4 flex gap-3">
-        <button 
-          onClick={onCancel}
-          className="flex-1 bg-slate-800 hover:bg-slate-700 text-white font-bold py-4 rounded-2xl transition-all"
-        >
-          Cancel
-        </button>
-        <button 
-          onClick={handleSave}
-          className="flex-[2] bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-2 shadow-xl shadow-emerald-900/20 transition-all active:scale-95"
-        >
-          <Save className="w-5 h-5" />
-          Save Workout
-        </button>
+      <div className="pt-6 flex gap-4">
+        <button onClick={onCancel} className="flex-1 bg-slate-900 text-white font-black py-5 rounded-2xl uppercase tracking-widest text-sm">Cancel</button>
+        <button onClick={handleSave} className="flex-[2] bg-emerald-600 text-white font-black py-5 rounded-2xl shadow-xl uppercase tracking-widest text-sm">Save Routine</button>
       </div>
     </div>
   );
