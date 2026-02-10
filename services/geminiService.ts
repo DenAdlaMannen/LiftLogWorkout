@@ -1,6 +1,2 @@
-
-// AI Services Disabled
-export const generateWorkout = async () => {
-  console.warn("AI generation is not supported in this version.");
-  return null;
-};
+// This file is no longer required for the standalone LiftLog application.
+export {};

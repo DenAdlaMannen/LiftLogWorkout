@@ -1,18 +1,15 @@
-
-const CACHE_NAME = 'liftlog-v2';
+const CACHE_NAME = 'liftlog-v1';
 const ASSETS = [
   './',
   './index.html',
   './manifest.json',
-  'https://cdn.tailwindcss.com',
-  'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap'
+  'https://cdn.tailwindcss.com'
 ];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      // Use {cache: 'reload'} to bypass any old cache during installation
-      return cache.addAll(ASSETS.map(url => new Request(url, { cache: 'reload' })));
+      return cache.addAll(ASSETS).catch(() => {});
     })
   );
   self.skipWaiting();
@@ -30,7 +27,6 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Only handle GET requests and avoid non-http(s) schemes
   if (event.request.method !== 'GET' || !event.request.url.startsWith('http')) return;
 
   event.respondWith(
@@ -38,12 +34,10 @@ self.addEventListener('fetch', (event) => {
       if (cachedResponse) return cachedResponse;
       
       return fetch(event.request).then(response => {
-        // Don't cache if not a valid response
         if (!response || response.status !== 200 || response.type !== 'basic') {
           return response;
         }
 
-        // Clone and cache for future use
         const responseToCache = response.clone();
         caches.open(CACHE_NAME).then(cache => {
           cache.put(event.request, responseToCache);
@@ -51,8 +45,7 @@ self.addEventListener('fetch', (event) => {
 
         return response;
       }).catch(() => {
-        // Fallback for offline if fetching fails
-        return caches.match('./');
+        return caches.match('./index.html');
       });
     })
   );
