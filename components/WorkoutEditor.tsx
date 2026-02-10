@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
-import { Workout, Exercise } from '../types';
-import { Plus, Trash2, Save, X } from 'lucide-react';
+import { Workout, Exercise } from '../types.ts';
+import { Plus, Trash2, X } from 'lucide-react';
 
 interface WorkoutEditorProps {
   workout: Workout | null;

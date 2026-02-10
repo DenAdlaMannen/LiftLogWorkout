@@ -1,6 +1,6 @@
 {
   "name": "LiftLog",
-  "description": "A high-performance personal workout tracker and planner with AI-powered routine generation.",
+  "description": "A high-performance personal workout tracker and planner.",
   "requestFramePermissions": [
     "camera"
   ]

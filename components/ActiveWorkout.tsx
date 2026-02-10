@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Workout, Exercise, WorkoutSession, ExerciseSession } from '../types';
+import { Workout, WorkoutSession, ExerciseSession } from '../types.ts';
 import { ChevronLeft, ChevronRight, CheckCircle, Timer, Trophy, X, TrendingUp, Plus, Minus, Trash2, StickyNote, History, Info, Calendar, Zap } from 'lucide-react';
 
 interface SetData {
@@ -53,15 +53,9 @@ const ActiveWorkout: React.FC<ActiveWorkoutProps> = ({ workout, history, onFinis
   const [showPrevNote, setShowPrevNote] = useState<string | null>(null);
   const [notes, setNotes] = useState<Record<string, string>>({});
 
-  // 1. Precise Exercise Ordering
-  // Goal: Furthest away/Never trained = Index 0 (First thing you see)
-  // Most recently trained = Last Index
   const lastPerformedMap = useMemo(() => {
     const map = new Map<string, number>();
-    
-    // Sort history to find the ABSOLUTE LATEST time each exercise name was seen
     const sortedHistory = [...history].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-    
     sortedHistory.forEach(session => {
       session.exercises.forEach(ex => {
         map.set(ex.name.toLowerCase(), new Date(session.date).getTime());
@@ -74,18 +68,13 @@ const ActiveWorkout: React.FC<ActiveWorkoutProps> = ({ workout, history, onFinis
     return [...workout.exercises].sort((a, b) => {
       const timeA = lastPerformedMap.get(a.name.toLowerCase()) || 0; 
       const timeB = lastPerformedMap.get(b.name.toLowerCase()) || 0;
-      
-      // If one was done more recently than the other, the older one (smaller timestamp) comes first
       if (timeA !== timeB) return timeA - timeB;
-      
-      // If timestamps are the same (both 0 or done in same session), use workout order
       return workout.exercises.indexOf(a) - workout.exercises.indexOf(b);
     });
   }, [workout.exercises, lastPerformedMap]);
   
   const [liveSessionData, setLiveSessionData] = useState<Record<string, SetData[]>>(() => {
     const initialData: Record<string, SetData[]> = {};
-    
     const exerciseHistoryMap = new Map<string, ExerciseSession>();
     [...history].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()).forEach(session => {
       session.exercises.forEach(ex => {
@@ -95,7 +84,6 @@ const ActiveWorkout: React.FC<ActiveWorkoutProps> = ({ workout, history, onFinis
 
     sortedExercises.forEach(ex => {
       const prevExData = exerciseHistoryMap.get(ex.name.toLowerCase());
-      
       if (prevExData) {
         initialData[ex.id] = Array.from({ length: prevExData.sets }, () => ({
           weight: prevExData.weight,
@@ -136,7 +124,6 @@ const ActiveWorkout: React.FC<ActiveWorkoutProps> = ({ workout, history, onFinis
       const volumes: number[] = [];
       let lastNote: string | undefined;
       let lastDate: string | undefined;
-
       sortedHistory.forEach(session => {
         const found = session.exercises.find(e => e.name.toLowerCase() === ex.name.toLowerCase());
         if (found) {
@@ -150,7 +137,6 @@ const ActiveWorkout: React.FC<ActiveWorkoutProps> = ({ workout, history, onFinis
       });
       statsMap.set(ex.id, { oneRM: oneRMs, volume: volumes, lastNote, lastDate });
     });
-
     return statsMap;
   }, [history, sortedExercises]);
 
@@ -187,7 +173,6 @@ const ActiveWorkout: React.FC<ActiveWorkoutProps> = ({ workout, history, onFinis
           const best1RM = best.weight / (1.0278 - (0.0278 * best.reps));
           return curr1RM > best1RM ? curr : best;
         }, sets[0]);
-
         return {
           name: ex.name,
           weight: bestSet.weight,

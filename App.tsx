@@ -1,10 +1,10 @@
 
 import React, { useState, useEffect } from 'react';
-import { Workout, AppView, WorkoutSession, BodyWeightEntry } from './types';
-import Dashboard from './components/Dashboard';
-import WorkoutEditor from './components/WorkoutEditor';
-import ActiveWorkout from './components/ActiveWorkout';
-import Analytics from './components/Analytics';
+import { Workout, AppView, WorkoutSession, BodyWeightEntry } from './types.ts';
+import Dashboard from './components/Dashboard.tsx';
+import WorkoutEditor from './components/WorkoutEditor.tsx';
+import ActiveWorkout from './components/ActiveWorkout.tsx';
+import Analytics from './components/Analytics.tsx';
 import { Plus, Dumbbell, BarChart3 } from 'lucide-react';
 
 const App: React.FC = () => {

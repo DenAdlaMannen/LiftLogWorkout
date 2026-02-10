@@ -1,6 +1,6 @@
 
 import React, { useMemo } from 'react';
-import { Workout, WorkoutSession } from '../types';
+import { Workout, WorkoutSession } from '../types.ts';
 import { Play, Edit2, Trash2, Calendar, ClipboardList } from 'lucide-react';
 
 interface DashboardProps {
