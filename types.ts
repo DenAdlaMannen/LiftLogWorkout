@@ -35,8 +35,4 @@ export interface BodyWeightEntry {
   weight: number;
 }
 
-export interface AppSettings {
-  enableAiFeatures: boolean;
-}
-
 export type AppView = 'DASHBOARD' | 'EDITOR' | 'SESSION' | 'ANALYTICS';

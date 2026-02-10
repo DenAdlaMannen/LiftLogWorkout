@@ -86,16 +86,18 @@ const App: React.FC = () => {
   };
 
   const handleDeleteWorkout = (id: string) => {
-    setWorkouts(prev => prev.filter(w => w.id !== id));
+    if (window.confirm("Delete this routine?")) {
+      setWorkouts(prev => prev.filter(w => w.id !== id));
+    }
   };
 
   const handleBackToDashboard = () => setView('DASHBOARD');
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
-      <header className="sticky top-0 z-50 bg-slate-950 border-b border-slate-800 px-6 py-4 flex items-center justify-between">
+      <header className="sticky top-0 z-50 bg-slate-950/80 backdrop-blur-lg border-b border-slate-800 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-2 cursor-pointer" onClick={() => setView('DASHBOARD')}>
-          <div className="p-2 bg-emerald-600 rounded-lg">
+          <div className="p-2 bg-emerald-600 rounded-lg shadow-lg shadow-emerald-900/20">
             <Dumbbell className="w-6 h-6 text-white" />
           </div>
           <h1 className="text-2xl font-black tracking-tighter text-white italic uppercase">
@@ -108,13 +110,13 @@ const App: React.FC = () => {
             <>
               <button
                 onClick={() => setView('ANALYTICS')}
-                className="p-2.5 bg-slate-900 border border-slate-800 rounded-full text-slate-400 hover:text-emerald-400 transition-all"
+                className="p-2.5 bg-slate-900 border border-slate-800 rounded-full text-slate-400 hover:text-emerald-400 transition-all active:scale-90"
               >
                 <BarChart3 className="w-5 h-5" />
               </button>
               <button
                 onClick={handleCreateNew}
-                className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-4 rounded-full transition-all active:scale-95"
+                className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-4 rounded-full transition-all active:scale-95 shadow-lg shadow-emerald-900/20"
               >
                 <Plus className="w-5 h-5" />
                 <span className="hidden sm:inline">New Routine</span>
