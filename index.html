@@ -59,13 +59,17 @@
   <div id="root"></div>
   <script type="module" src="./index.tsx"></script>
   <script>
+    // Robust Service Worker registration that won't crash the app on origin/URL errors
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js').then(reg => {
-          console.log('LiftLog SW registered');
-        }).catch(err => {
-          console.error('LiftLog SW failed', err);
-        });
+        navigator.serviceWorker.register('./sw.js')
+          .then(reg => {
+            console.log('LiftLog SW registered');
+          })
+          .catch(err => {
+            // Log as warning because this is expected in many dev/preview environments
+            console.warn('Service Worker registration skipped or failed:', err.message);
+          });
       });
     }
   </script>
